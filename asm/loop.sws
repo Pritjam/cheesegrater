@@ -1,0 +1,15 @@
+; load special address into %di
+  MOVL %di, $69
+  MOVH %di, $69
+
+  MOVL %ax, #5
+  JMP .TEST_CND
+.LOOP_START:
+  STORE %ax, [%di]
+  SUB %ax, #1
+.TEST_CND:
+  CMP %ax, #0
+  J.GT .LOOP_START
+
+.DONE:
+  HALT
