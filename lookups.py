@@ -1,4 +1,5 @@
 from instructions import *
+import re
 
 INSTRUCTION_TO_PARSE_FN = {
   "halt" : chgstat, 
