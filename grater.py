@@ -5,6 +5,8 @@ from bitstring import CreationError, BitArray
 import os.path
 import re
 
+VERSION = 2
+
 input_path = sys.argv[1]
 
 out_folder = sys.argv[2] if len(sys.argv) >= 3 else ""
@@ -106,6 +108,16 @@ filename = os.path.basename(input_path)
 (filename, ext) = os.path.splitext(filename)
 out_filename = os.path.join(out_folder, filename)
 with open(out_filename, "wb") as file:
+  # Write header, VERSION 2typedef struct parmesan_rind {
+  #   char magic_identifier[4]; // should be "parm"
+  #   uint16_t length;
+  #   uint8_t version; 
+  #   uint8_t reserved; // for future use
+  file.write(b'parm')
+  length = len(instructions) * 2
+  file.write(BitArray(uintle=length, length=16).bytes)
+  file.write(BitArray(uint=VERSION, length=8).bytes)
+  file.write(b'\0')
   for instr in instructions:
     file.write(instr.bytes)
 
