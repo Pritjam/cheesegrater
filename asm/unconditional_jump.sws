@@ -1,10 +1,10 @@
-; load special address into %di
-  MOVL %di, $69
-  MOVH %di, $69
+; load special address into %ix
+  MOVL %ix, $69
+  MOVH %ix, $69
 
   MOVL %ax, $45
   JMP .LABEL
   ADD %ax, #10
 .LABEL:
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
   HALT

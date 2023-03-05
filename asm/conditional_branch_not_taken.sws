@@ -1,17 +1,17 @@
-; load special address into %di
-  MOVL %di, $69
-  MOVH %di, $69
+; load special address into %ix
+  MOVL %ix, $69
+  MOVH %ix, $69
 
   MOVL %ax, $45
   MOVL %bx, #50
   cmp %ax, %bx
   J.EQ .EQUAL
 ; If it wasn't 0, print %ax
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
   JMP .DONE
 
 .EQUAL:
   ADD %bx, #10
-  STORE %bx, [%di]
+  STORE %bx, [%ix]
 .DONE:
   HALT

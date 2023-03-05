@@ -57,7 +57,7 @@ def parse_int_literal_string(literal):
     raise SyntaxError("Invalid literal syntax on token %s" % literal)
 
 
-REGS = ["%ax", "%bx", "%cx", "%dx", "%bp", "%si", "%di", "%sp"]
+REGS = ["%ax", "%bx", "%cx", "%dx", "%ix", "%bp", "%sp", "%lr"]
 CONDS = ["eq", "ne", "ge", "gt", "lt", "le", "cs", "cc"]
 
 ALU_RR_ALU_OPBITS = {

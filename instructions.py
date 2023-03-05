@@ -36,10 +36,10 @@ def alu(insn):
 # MOVH and MOVL instrs.
 def mov_hl(insn):
   # Passed an instruction looking like
-  #   MOVL %di, $FF
+  #   MOVL %ix, $FF
   toks = re.split(", |,| ", insn)
   op = toks[0]
-  opbits = BitArray(uint=0b1100, length=5) if op == "movl" else BitArray(uint=0b1101, length=5)
+  opbits = BitArray(uint=0b00111, length=5) if op == "movl" else BitArray(uint=0b01011, length=5)
   imm = lookups.parse_int_literal_string(toks[2])
   imm = BitArray(uint=imm, length=8)
   dst = lookups.REGS.index(toks[1])
@@ -66,7 +66,7 @@ def _parse_base_offset(toks):
 def _parse_pre_index(toks):
   # ex: STORE %ax, [%bx, #8]!
   op = BitArray(uint=0b00101, length=5) if toks[0] == "load" else BitArray(uint=0b01001, length=5)
-  imm = lookups.parse_int_literal_string(toks[4].strip(" ]!"))
+  imm = lookups.parse_int_literal_string(toks[3].strip(" ]!"))
   imm = BitArray(int=imm, length=5)
   src, trf = toks[2].strip("[ "), toks[1].strip(" ,")
   src, trf = lookups.REGS.index(src), lookups.REGS.index(trf)
@@ -106,8 +106,7 @@ def chgstat(insn):
 def mov(insn):
   # MOV %ax, %bx
   toks = re.split(", |,| ", insn)
-  op = toks[0]
-  opbits = BitArray(uint=0b00001, length=5)
+  opbits = BitArray(uint=0b01110, length=5)
   secondary_bits = BitArray(uint=0b000, length=3)
   hw = BitArray(uint=0, length=2) # TODO: Decide how hw functionality will be used
   dst, src = toks[1], toks[2]
@@ -132,7 +131,7 @@ def _parse_direct_jc(toks):
   return op + imm
 
 def _parse_conditional_jump(toks):
-  op = BitArray(uint=0b10101, length=5)
+  op = BitArray(uint=0b01101, length=5)
   cnd = toks[0].split('.')[1]
   cnd = lookups.CONDS.index(cnd)
   cnd = BitArray(uint=cnd, length=3)
@@ -154,7 +153,7 @@ def jmp_call(insn):
 
 # RET instruction. It's special. (not really)
 def ret(insn):
-  return BitArray(uint=0b1010000000000000, length=16)
+  return BitArray(uint=0b0110000000000000, length=16)
 
 def unimplemented(insn):
   raise NotImplementedError("Instruction %s isn't implemented!" % insn)

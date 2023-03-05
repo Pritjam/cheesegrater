@@ -5,7 +5,7 @@ from bitstring import CreationError, BitArray
 import os.path
 import re
 
-VERSION = 2
+VERSION = 3
 
 input_path = sys.argv[1]
 

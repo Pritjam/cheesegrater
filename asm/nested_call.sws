@@ -1,0 +1,26 @@
+; load special address into %ix
+  MOVL %ix, $69
+  MOVH %ix, $69
+
+; load some data
+  MOVL %ax, #69
+  MOVL %bx, #10
+  MOVL %cx, #5
+; add the 10 and 5 to the 69
+  CALL .ADD_AX_BX_CX
+; print result
+  STORE %ax, [%ix]
+  HALT
+
+.ADD_AX_BX_CX:
+  ADD %ax, %bx
+; push %lr before making another call
+  STORE %lr, [%sp, #-1]!
+  CALL .ADD_AX_CX
+; pop %lr
+  LOAD %lr, [%sp], #1
+  RET
+
+.ADD_AX_CX:
+  ADD %ax, %cx
+  RET

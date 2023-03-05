@@ -1,6 +1,6 @@
-; load special address into %di
-  MOVL %di, $69
-  MOVH %di, $69
+; load special address into %ix
+  MOVL %ix, $69
+  MOVH %ix, $69
 ; This test is meant to be used with a memory image file!
 ; The associated memory image file has 16 numbers already pushed onto the stack.
 ; Because of this, we need to artifically lower the stack pointer.
@@ -22,7 +22,7 @@
   CMP %cx, #0
   J.GE .LOOP_BODY
 
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
 
 .DONE:
   HALT

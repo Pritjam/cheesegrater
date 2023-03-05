@@ -1,6 +1,6 @@
-; load special address into %di
-  MOVL %di, $69
-  MOVH %di, $69
+; load special address into %ix
+  MOVL %ix, $69
+  MOVH %ix, $69
 
 ; load some data
   MOVL %ax, #69
@@ -12,7 +12,7 @@
 ; add the (69 + 10) to the 5
   CALL .ADD_AX_BX
 ; print result
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
   HALT
 
 .ADD_AX_BX:

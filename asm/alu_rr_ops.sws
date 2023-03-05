@@ -1,21 +1,21 @@
-; load special address into %di
-  MOVL %di, $69
-  MOVH %di, $69
+; load special address into %ix
+  MOVL %ix, $69
+  MOVH %ix, $69
 
   
   MOVL %ax, $45
   MOVL %bx, $20
   MOVL %cx, #4
   MOVL %dx, $0F
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
   ADD %ax, %bx
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
   AND %ax, %dx
-  STORE %ax, [%di]
+  STORE %ax, [%ix]
   OR %bx, %dx
-  STORE %bx, [%di]
+  STORE %bx, [%ix]
   LSL %bx, %cx
-  STORE %bx, [%di]
+  STORE %bx, [%ix]
   LSR %bx, %cx
-  STORE %bx, [%di]
+  STORE %bx, [%ix]
   HALT
