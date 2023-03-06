@@ -52,38 +52,63 @@ def mov_hl(insn):
 # Post-Indexed LOAD and STORE
 def _parse_base_offset(toks):
   # ex: STORE %ax, [%sp{, #8}]
-  op = BitArray(uint=0b00100, length=5) if toks[0] == "load" else BitArray(uint=0b01000, length=5)
+  base_is_sp = False
+  op = BitArray(uint=0b00100, length=5) if toks[0].startswith("load") else BitArray(uint=0b01000, length=5)
+  w = BitArray(uint=0, length=1) if toks[0].endswith("b") else BitArray(uint=1, length=1)
   imm = 0
   if len(toks) == 4:
     # We actually have an offset
     imm = lookups.parse_int_literal_string(toks[3].strip(" ]"))
-  imm = BitArray(int=imm, length=5)
   src, trf = toks[2].strip("[ ]"), toks[1].strip(" ,")
   src, trf = lookups.REGS.index(src), lookups.REGS.index(trf)
+  if src == 6: # if we're using %sp as the base, we have some extra room for imm
+    imm = BitArray(int=imm, length=7)
+    base_is_sp = True
+  else:
+    imm = BitArray(int=imm, length=4)
   src, trf = BitArray(uint=src, length=3), BitArray(uint=trf, length=3)
-  return op + imm + src + trf
+
+  if base_is_sp:
+    return op + w + imm + trf
+  else:
+    return op + w + imm + src + trf
 
 def _parse_pre_index(toks):
-  # ex: STORE %ax, [%bx, #8]!
-  op = BitArray(uint=0b00101, length=5) if toks[0] == "load" else BitArray(uint=0b01001, length=5)
-  imm = lookups.parse_int_literal_string(toks[3].strip(" ]!"))
-  imm = BitArray(int=imm, length=5)
+  # ex: STORE %ax, [%ix, #8]!
+  op = BitArray(uint=0b00110, length=5) if toks[0].startswith("load") else BitArray(uint=0b1010, length=5)
+  h = BitArray(uint=0, length=1)
+  w = 0 if toks[0].endswith("b") else 1
+  w = BitArray(uint=w, length=1)
+  imm5 = lookups.parse_int_literal_string(toks[3].strip(" ]!"))
+  imm5 = BitArray(int=imm5, length=5)
   src, trf = toks[2].strip("[ "), toks[1].strip(" ,")
   src, trf = lookups.REGS.index(src), lookups.REGS.index(trf)
+  if src != 4 and src != 6: # make sure src corresponds to %ix or %sp
+    raise AssertionError("Source must be %ix for pre or post indexed load/store!")
+  s = 0 if src == 4 else 1 # 0 for %ix, 1 for %sp
+  s = BitArray(uint=s, length=1)
   src, trf = BitArray(uint=src, length=3), BitArray(uint=trf, length=3)
-  return op + imm + src + trf
+  return op + w + h + s + imm5 + trf
     
 def _parse_post_index(toks):
-  # ex: STORE %ax, [%bx], #8
-  op = BitArray(uint=0b00110, length=5) if toks[0] == "load" else BitArray(uint=0b01010, length=5)
-  imm = lookups.parse_int_literal_string(toks[-1])
-  imm = BitArray(int=imm, length=5)
+  # ex: STORE %ax, [%ix], #8
+  op = BitArray(uint=0b00110, length=5) if toks[0].startswith("load") else BitArray(uint=0b01010, length=5)
+  h = BitArray(uint=1, length=1)
+  w = 0 if toks[0].endswith("b") else 1
+  w = BitArray(uint=w, length=1)
+  imm5 = lookups.parse_int_literal_string(toks[-1])
+  imm5 = BitArray(int=imm5, length=5)
   src, trf = toks[2].strip("[ ]"), toks[1].strip(" ,")
   src, trf = lookups.REGS.index(src), lookups.REGS.index(trf)
+  if src != 4 and src != 6: # make sure src corresponds to %ix or %sp
+    raise AssertionError("Source must be %ix for pre or post indexed load/store!")
+  s = 0 if src == 4 else 1 # 0 for %ix, 1 for %sp
+  s = BitArray(uint=s, length=1)
   src, trf = BitArray(uint=src, length=3), BitArray(uint=trf, length=3)
-  return op + imm + src + trf
+  return op + w + h + s + imm5 + trf
 
 def load_store(insn):
+  # LOAD, LDIX, LDXPRE, LDXPOST
   toks = re.split(", |,| ", insn)
   if insn.endswith('!'):
     return _parse_pre_index(toks)

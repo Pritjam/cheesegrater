@@ -5,7 +5,7 @@ from bitstring import CreationError, BitArray
 import os.path
 import re
 
-VERSION = 3
+VERSION = 4
 
 input_path = sys.argv[1]
 
@@ -98,8 +98,6 @@ for (index, code_line) in enumerate(code_lines):
   # except Exception as exception:
   #   print("Other error occurred: \n\t%s" % str(exception))
   #   exit(0)
-    
-
 
 
 # print("All instructions parsed. Writing to file %s now" % "out.pj")

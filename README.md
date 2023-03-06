@@ -2,7 +2,7 @@
 
 ## Info
 
-This is an assembler for the [pARMesan](https://github.com/Pritjam/parmesan) architecture. It takes input of SWISS assembly files (carrying the `.sws` extension) and creates WHEEL executable files from them. This repository also contains (or will eventually contain) the documentation for the WHEEL executable file format (a cheesy analog of the well-established ELF file format). 
+This is an assembler for the [pARMesan](https://github.com/Pritjam/parmesan) architecture. It takes input of SWISS assembly files (carrying the `.sws` extension) and creates PARM executable files from them. PARM files are just a sequence of pARMesan instructions in a file, with little to no metadata. This is in contrast to a more powerful file format, such as ELF. This repository also contains (or will eventually contain) the documentation for the WHEEL executable file format (a cheesy analog of the well-established ELF file format). 
 
 ## Usage
 
