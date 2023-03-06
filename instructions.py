@@ -69,6 +69,7 @@ def _parse_base_offset(toks):
   src, trf = BitArray(uint=src, length=3), BitArray(uint=trf, length=3)
 
   if base_is_sp:
+    op = BitArray(uint=0b00101, length=5) if toks[0].startswith("load") else BitArray(uint=0b01001, length=5)
     return op + w + imm + trf
   else:
     return op + w + imm + src + trf
