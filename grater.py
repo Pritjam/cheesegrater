@@ -5,7 +5,7 @@ from bitstring import CreationError, BitArray
 import os.path
 import re
 
-VERSION = 4
+VERSION = 5
 
 input_path = sys.argv[1]
 
@@ -117,6 +117,7 @@ with open(out_filename, "wb") as file:
   file.write(BitArray(uint=VERSION, length=8).bytes)
   file.write(b'\0')
   for instr in instructions:
+    instr.byteswap()
     file.write(instr.bytes)
 
       
