@@ -44,23 +44,23 @@ with open(input_path) as file:
       continue
     
     # array lines
-    match = re.search(r'da \[(.*)\]', line)
-    if match:
-      # now to determine if it's a well-formed array or not
-      contents = match.groups()[0]
-      contents = re.split(r',\s*', contents)
-      for element in contents:
-        try:
-          elem = lookups.parse_int_literal_string(element)
-        except SyntaxError as exception:
-          print("Error! Bad syntax on array element %s" % elem)
-          quit(0)
-        if int(elem) > 2 ** 16 - 1:
-          print("Error! Array element '%s' out of range!" % elem)
-          quit(0)
-        code_lines.append("dw %s" % elem)
-        index += 1
-      continue
+    # match = re.search(r'da \[(.*)\]', line)
+    # if match:
+    #   # now to determine if it's a well-formed array or not
+    #   contents = match.groups()[0]
+    #   contents = re.split(r',\s*', contents)
+    #   for element in contents:
+    #     try:
+    #       elem = lookups.parse_int_literal_string(element)
+    #     except SyntaxError as exception:
+    #       print("Error! Bad syntax on array element %s" % elem)
+    #       quit(0)
+    #     if int(elem) > 2 ** 16 - 1:
+    #       print("Error! Array element '%s' out of range!" % elem)
+    #       quit(0)
+    #     code_lines.append("dw %s" % elem)
+    #     index += 1
+    #   continue
     
       
     # Line of code or data
