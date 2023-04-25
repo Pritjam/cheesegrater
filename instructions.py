@@ -2,6 +2,16 @@ from bitstring import BitArray
 import re
 import lookups
 
+# All processor status change instructions
+# HALT, EXX, EXF, EI, DI, NOP
+def chgstat(insn):
+  # ex: HALT
+  op = BitArray(uint=0, length=5)
+  secondary_bits = lookups.CHGSTAT_INSNBITS[insn.split(" ")[0]]
+  secondary_bits = BitArray(uint=secondary_bits, length=3)
+  extra = BitArray(uint=0, length=8)
+  return op + secondary_bits + extra
+
 def _parse_alu_rr(toks):
   # Passed an instruction looking like
   #   ['ADD',  '%ax', '%bx']
@@ -25,6 +35,8 @@ def _parse_alu_ri(toks):
   dst = lookups.REGS.index(dst)
   dst = BitArray(uint=dst, length=3)
   return opbits + alu_opbits + h + imm + dst
+
+# def float(insn)
 
 def alu(insn):
   toks = re.split(", |,| ", insn)
@@ -50,7 +62,7 @@ def mov_hl(insn):
 # Base + Offset LOAD and STORE
 # Pre-Indexed LOAD and STORE
 # Post-Indexed LOAD and STORE
-def _parse_base_offset(toks):
+def _parse_spix(toks):
   # ex: STORE %ax, [%sp{, #8}]
   base_is_sp = False
   op = BitArray(uint=0b00100, length=5) if toks[0].startswith("load") else BitArray(uint=0b01000, length=5)
@@ -109,24 +121,14 @@ def _parse_post_index(toks):
   return op + w + h + s + imm5 + trf
 
 def load_store(insn):
-  # LOAD, LDIX, LDXPRE, LDXPOST
   toks = re.split(", |,| ", insn)
   if insn.endswith('!'):
     return _parse_pre_index(toks)
   elif insn.endswith(']'):
-    return _parse_base_offset(toks)
+    return _parse_spix(toks)
   else:
     return _parse_post_index(toks)
 
-# All processor status change instructions
-# HALT, EXX, EXF, EI, DI, NOP
-def chgstat(insn):
-  # ex: HALT
-  op = BitArray(uint=0, length=5)
-  secondary_bits = lookups.CHGSTAT_INSNBITS[insn.split(" ")[0]]
-  secondary_bits = BitArray(uint=secondary_bits, length=3)
-  extra = BitArray(uint=0, length=8)
-  return op + secondary_bits + extra
 
 # MOV instruction
 def mov(insn):

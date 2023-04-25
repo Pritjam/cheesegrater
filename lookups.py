@@ -19,10 +19,6 @@ INSTRUCTION_TO_PARSE_FN = {
   "sbc" : alu, 
   "test" : alu, 
   "asr" : alu, 
-  "vadd" : alu, 
-  "vsub" : alu, 
-  "vlsl" : alu, 
-  "vlsr" : alu, 
   "iadd" : alu, 
   "isub" : alu, 
   "iand" : alu, 
@@ -75,10 +71,6 @@ ALU_RR_ALU_OPBITS = {
   "sbc": 0b1001,
   "test": 0b1010,
   "asr": 0b1011,
-  "vadd": 0b1100,
-  "vsub": 0b1101,
-  "vlsl": 0b1110,
-  "vlsr": 0b1111,
 }
 
 ALU_RI_ALU_OPBITS = {
@@ -94,8 +86,6 @@ ALU_RI_ALU_OPBITS = {
 
 CHGSTAT_INSNBITS = {
   "halt": 0b000,
-  "exx": 0b001,
-  "exf": 0b010,
   "ei": 0b011,
   "di": 0b100,
   "nop": 0b111
