@@ -10,4 +10,4 @@ To compile a file, just invoke `python3 grater.py FILENAME.sws`. A WHEEL binary 
 
 ## Code Examples
 
-There are some sample SWISS files in the `asm` directory to help you get a feel for the pARMesan assembly format. For more information on pARMesan, check out the WIP [docs](https://github.com/Pritjam/pARMesan/blob/main/docs/index.md)
+There are some sample SWISS files in the `sws` directory to help you get a feel for the pARMesan assembly format. For more information on pARMesan, check out the WIP [docs](https://github.com/Pritjam/pARMesan/blob/main/docs/index.md)
