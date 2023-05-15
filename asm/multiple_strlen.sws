@@ -1,0 +1,51 @@
+; open up stack space
+  SUB %sp, #6
+; load special address into %ix and store on stack
+  MOVL %ix, $69
+  MOVH %ix, $69
+  STOREW %ix, [%sp, #4]
+; load in pointer to block of pointers
+  MOVL %ix, $00
+  MOVH %ix, $10
+  STOREW %ix, [%sp, #2]
+; load in ctr to 4
+  MOVL %cx, #4
+  MOVH %cx, #0
+.BODY:
+  CMP %cx, #0
+  J.EQ .END
+  SUB %cx, #1
+; save %cx as it is caller-saved
+  STOREW %cx, [%sp]
+; set up argument for fn call
+  LOADW %ix, [%sp, #2]
+  LOADW %ax, [%ix], #2
+  STOREW %ix, [%sp, #2]
+  CALL .STRLEN
+; restore saved variable
+  LOADW %cx, [%sp]
+; %ax now has the length of the string, we must print it
+  LOADW %ix, [%sp, #4]
+  STOREW %ax, [%ix]
+  JMP .BODY
+.END:
+  HALT
+
+
+.STRLEN:
+; pointer is stored in %ax. We need to return length in %ax as well.
+  STOREW %ix, [%sp, #-2]!
+  XOR %cx, %cx
+  MOV %ix, %ax
+  LOADB %ax, [%ix], #1
+  JMP .TEST
+.LOOP:
+  ADD %cx, #1
+  LOADB %ax, [%ix], #1
+.TEST:
+  CMP %ax, #0
+  J.NE .LOOP
+
+  MOV %ax, %cx
+  LOADW %ix, [%sp], #2
+  RET
