@@ -1,8 +1,10 @@
 from bitstring import BitArray
 import eval_lookups
 
+
 def eval_noarg(statement):
     return BitArray(uint=eval_lookups.NOARG_OPCODES[statement["opcode"]], length=16)
+
 
 def eval_jcc(statement):
     opbits = BitArray(uint=0b10100, length=5)
@@ -16,11 +18,12 @@ def eval_jcc(statement):
     jump_offset_bits = BitArray(int=offset, length=8)
     return opbits + cc_bits + jump_offset_bits
 
+
 def eval_jump_call(statement):
-# JMP  11000 imm______11
-# JMPR 11001 00000000 dst
-# CALL 11010 imm______11
-# CALR 11011 00000000 dst
+    # JMP  11000 imm______11
+    # JMPR 11001 00000000 dst
+    # CALL 11010 imm______11
+    # CALR 11011 00000000 dst
     dest = statement["branch_dest"]["dest"]
     op_int = 0b11000 if statement["opcode"] == "JMP" else 0b11010
     if statement["branch_dest"]["type"] == "REGISTER":
@@ -39,6 +42,7 @@ def eval_jump_call(statement):
     opbits = BitArray(uint=op_int, length=5)
     return opbits + jump_offset_bits
 
+
 def eval_load_store(statement):
     op_int = eval_lookups.LOAD_STORE_BITS[statement["opcode"]]
     trf_int = eval_lookups.REG_BITS[statement["trf"]]
@@ -48,7 +52,9 @@ def eval_load_store(statement):
         op_int += 2
         # must use either SP or IX as base
         if statement["mem_operand"]["source"] not in ["IX", "SP"]:
-            raise SyntaxError("Only register %ix or %sp can be used in base + offset addressing!")
+            raise SyntaxError(
+                "Only register %ix or %sp can be used in base + offset addressing!"
+            )
         s_int = 0 if statement["mem_operand"]["source"] == "IX" else 1
         sbit = BitArray(uint=s_int, length=1)
         imm_bits = BitArray(int=statement["mem_operand"]["offset"], length=7)
@@ -66,6 +72,7 @@ def eval_load_store(statement):
     op_bits = BitArray(uint=op_int, length=5)
     return op_bits + imm_bits + src_bits + trf_bits
 
+
 def eval_rr_format(statement):
     # ALU_RR and also MOV
     src_int = eval_lookups.REG_BITS[statement["src"]]
@@ -77,7 +84,7 @@ def eval_rr_format(statement):
         opbits = BitArray(uint=0b10101000, length=8)
         hwbits = BitArray(uint=0b00, length=2)
         return opbits + hwbits + src_bits + dst_bits
-    
+
     # resolve aluop bits
     opbits = BitArray(uint=0b00001, length=5)
     alu_opint = eval_lookups.ALU_RR_ALUOP_BITS[statement["opcode"]]
@@ -85,9 +92,10 @@ def eval_rr_format(statement):
     h_bit = BitArray(uint=0, length=1)
     return opbits + alu_opbits + h_bit + src_bits + dst_bits
 
+
 def eval_ri_format(statement):
     # ALU_RI
-    dst_int = eval_lookups.REG_BITS[statement["dst"]]    
+    dst_int = eval_lookups.REG_BITS[statement["dst"]]
     dst_bits = BitArray(uint=dst_int, length=3)
     imm_int = int(statement["immediate"])
 
@@ -96,7 +104,7 @@ def eval_ri_format(statement):
         opbits = BitArray(uint=opint, length=5)
         imm_bits = BitArray(uint=imm_int, length=8)
         return opbits + imm_bits + dst_bits
-    
+
     # resolve aluop bits
     opbits = BitArray(uint=0b00010, length=5)
     alu_opint = eval_lookups.ALU_RI_ALUOP_BITS[statement["opcode"]]
@@ -105,11 +113,12 @@ def eval_ri_format(statement):
     h_bit = BitArray(uint=0, length=1)
     return opbits + alu_opbits + h_bit + imm_bits + dst_bits
 
+
 INSTR_TYPE_TO_EVAL_FN = {
-    "noarg":eval_noarg,
+    "noarg": eval_noarg,
     "jcc": eval_jcc,
-    "jump_call":eval_jump_call,
-    "load_store":eval_load_store,
-    "rr_format":eval_rr_format,
-    "ri_format":eval_ri_format
-    }
+    "jump_call": eval_jump_call,
+    "load_store": eval_load_store,
+    "rr_format": eval_rr_format,
+    "ri_format": eval_ri_format,
+}

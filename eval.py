@@ -1,5 +1,6 @@
 import eval_fns
 
+
 def extract_label_locs(statements):
     # Iterate through the statements, keeping track of the instruction address for each statement.
     # Also keep a dictionary of labels -> addresses.
@@ -16,8 +17,9 @@ def extract_label_locs(statements):
                     raise SyntaxError("Duplicate label %s!" % statement["label"])
                 # label is new
                 labels[statement["label"]] = address
-    
+
     return labels
+
 
 def assemble_statements(statements, labels):
     address = 0
@@ -30,7 +32,7 @@ def assemble_statements(statements, labels):
         # replace label with address of label in jumps
         if "branch_dest" in statement and statement["branch_dest"]["type"] == "LABEL":
             statement["branch_dest"]["dest"] = labels[statement["branch_dest"]["dest"]]
-        
+
         statement["address"] = address
         # call lookup fn
         insnbits = eval_fns.INSTR_TYPE_TO_EVAL_FN[statement["instr_type"]](statement)
