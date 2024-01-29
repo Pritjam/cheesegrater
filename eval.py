@@ -25,7 +25,7 @@ def assemble_statements(statements, labels):
     address = 0
     insnbits_arr = []
     for statement in statements:
-        if statement["type"] is not "instruction":
+        if statement["type"] != "instruction":
             continue
         # print(statement)
         # print("Assembling instr: ", statement)
