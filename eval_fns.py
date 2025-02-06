@@ -15,7 +15,8 @@ def eval_jcc(statement):
     dest = int(statement["branch_dest"]["dest"])
     pos = statement["address"]
     offset = dest - pos
-    jump_offset_bits = BitArray(int=offset, length=8)
+    assert offset % 2 == 0
+    jump_offset_bits = BitArray(int=(offset//2), length=8)
     return opbits + cc_bits + jump_offset_bits
 
 
@@ -38,7 +39,8 @@ def eval_jump_call(statement):
     dest = int(statement["branch_dest"]["dest"])
     pos = statement["address"]
     offset = dest - pos
-    jump_offset_bits = BitArray(int=offset, length=11)
+    assert offset % 2 == 0
+    jump_offset_bits = BitArray(int=(offset//2), length=11)
     opbits = BitArray(uint=op_int, length=5)
     return opbits + jump_offset_bits
 

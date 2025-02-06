@@ -1,9 +1,7 @@
 ; load special address into %ix
   MOVL %ix, $69
   MOVH %ix, $69
-; This test is meant to be used with a memory image file!
-; The associated memory image file has 16 numbers already pushed onto the stack.
-; Because of this, we need to artifically lower the stack pointer.
+; set up stack pointer (there's a string on the stack, see the bottom)
   MOVH %sp, $FF
   MOVL %sp, $F0
 
@@ -12,16 +10,19 @@
 ; zero out the length counter
   XOR %cx, %cx
   LOADB %ax, [%sp], #1
-  JMP .TEST_CND
-.LOOP_BODY:
+  JMP TEST_CND
+LOOP_BODY:
   ADD %cx, #1
 ; Use a post-indexed load as a stack pop
   LOADB %ax, [%sp], #1
-.TEST_CND:
+TEST_CND:
   CMP %ax, #0
-  J.NE .LOOP_BODY
+  J.NE LOOP_BODY
 ; print length of string
   STOREW %cx, [%ix]
 
-.DONE:
+DONE:
   HALT
+
+.seek $FFF0
+.asciiz "Hello World!"

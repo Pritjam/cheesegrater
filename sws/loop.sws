@@ -3,13 +3,13 @@
   MOVH %ix, $69
 
   MOVL %ax, #5
-  JMP .TEST_CND
-.LOOP_START:
+  JMP TEST_CND
+LOOP_START:
   STOREW %ax, [%ix]
   SUB %ax, #1
-.TEST_CND:
+TEST_CND:
   CMP %ax, #0
-  J.GT .LOOP_START
+  J.GT LOOP_START
 
-.DONE:
+DONE:
   HALT

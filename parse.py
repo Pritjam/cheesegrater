@@ -66,8 +66,9 @@ def parse_instr_statement(lexer: lex.lexer):
     # print("Parsing instruction statement `%s`" % lexer.input_str)
     statement = {}
     statement["type"] = "instruction"
+    statement["size"] = 2
     # first token is the instruction opcode string
-    statement["opcode"] = lexer.curr_tok.val
+    statement["opcode"] = lexer.curr_tok.val.upper()
     # print("found instruction with opcode of %s" % statement["opcode"])
     # consume opcode token
     lexer.advance()
@@ -88,16 +89,15 @@ def parse_instr_statement(lexer: lex.lexer):
         )
         lexer.advance()
         expect(
-            lexer.curr_tok.type == "STRING",
+            lexer.curr_tok.type == "IDENTIFIER",
             SyntaxError,
             "Expected condition code following period in J.cc instruction",
         )
-        statement["condition_code"] = lexer.curr_tok.val
+        statement["condition_code"] = lexer.curr_tok.val.upper()
         lexer.advance()
         # Looking for one label
-        lexer.advance()
         expect(
-            lexer.curr_tok.type == "STRING",
+            lexer.curr_tok.type == "IDENTIFIER",
             SyntaxError,
             "Expected a label after J.cc instruction, found %s-type instead"
             % lexer.curr_tok.type,
@@ -111,9 +111,8 @@ def parse_instr_statement(lexer: lex.lexer):
         # We might have a register, we might have a label
         if lexer.curr_tok.type == "REGISTER":
             statement["branch_dest"] = {"type": "REGISTER", "dest": lexer.curr_tok.val}
-        elif lexer.curr_tok.type == "PERIOD":
-            lexer.advance()
-            expect(lexer.curr_tok.type == "STRING", SyntaxError, "Bad label for jump!")
+        elif lexer.curr_tok.type == "IDENTIFIER":
+            expect(lexer.curr_tok.type == "IDENTIFIER", SyntaxError, "Bad label for jump!")
             statement["branch_dest"] = {"type": "LABEL", "dest": lexer.curr_tok.val}
         else:
             raise SyntaxError(
@@ -187,12 +186,74 @@ def parse_instr_statement(lexer: lex.lexer):
 
 
 def parse_directive_statement(lexer: lex.lexer):
+    lexer.advance()
+    expect(lexer.curr_tok.type == "IDENTIFIER", SyntaxError, "Expected a directive following a dot.")
     statement = {}
     statement["type"] = "directive"
-    lexer.advance()
-    # TODO: this will have to change when we properly implement directives.
-    # For now, the only directive is label definitions, so we can do this.
-    statement["subtype"] = "label_def"
+    directive = lexer.curr_tok.val.lower()
+    if directive == "ascii":
+        expect(lexer.lookahead_tok.type == "STRING", SyntaxError, "Expected a string literal following a .ascii directive.")
+        statement["subtype"] = "bytes"
+        lexer.advance()
+        statement["bytes"] = lexer.curr_tok.val.encode("ascii")
+        statement["size"] = len(statement["bytes"])
+        return statement
+    elif directive == "asciiz":
+        expect(lexer.lookahead_tok.type == "STRING", SyntaxError, "Expected a string literal following a .asciiz directive.")
+        statement["subtype"] = "bytes"
+        lexer.advance()
+        statement["bytes"] = lexer.curr_tok.val.encode("ascii") + b'\0'
+        statement["size"] = len(statement["bytes"])
+        return statement
+    elif directive == "byte":
+        expect(lexer.lookahead_tok.type == "NUMBER", SyntaxError, "Expected at least one numerical literal following a .byte directive.")
+        statement["subtype"] = "bytes"
+        lexer.advance()
+        statement["bytes"] = lexer.curr_tok.val.to_bytes(1, "little")
+        while lexer.lookahead_tok.type == "COMMA":
+            lexer.advance()
+            lexer.advance()
+            statement["bytes"] += lexer.curr_tok.val.to_bytes(1, "little")
+        statement["size"] = len(statement["bytes"])
+        return statement
+    elif directive == "word":
+        expect(lexer.lookahead_tok.type == "NUMBER", SyntaxError, "Expected at least one numerical literal following a .word directive.")
+        statement["subtype"] = "bytes"
+        lexer.advance()
+        statement["bytes"] = lexer.curr_tok.val.to_bytes(2, "little")
+        while lexer.lookahead_tok.type == "COMMA":
+            lexer.advance()
+            lexer.advance()
+            statement["bytes"] += lexer.curr_tok.val.to_bytes(2, "little")
+        statement["size"] = len(statement["bytes"])
+        return statement
+    elif directive == "seek":
+        expect(lexer.lookahead_tok.type == "NUMBER", SyntaxError, "Expected an offset after seek directive.")
+        lexer.advance()
+        statement["subtype"] = "seek"
+        statement["seek"] = lexer.curr_tok.val % 65536
+        return statement
+    elif directive == "align":
+        expect(lexer.lookahead_tok.type == "NUMBER", SyntaxError, "Expected an alignment boundary value following .align directive.")
+        lexer.advance()
+        statement["subtype"] = "align"
+        statement["align"] = lexer.curr_tok.val
+        if lexer.lookahead_tok.type == "NUMBER":
+            lexer.advance()
+            statement["fill"] = (lexer.curr_tok.val % 256).to_bytes(1, "little")
+        else:
+            statement["fill"] = b'\0'
+        return statement
+    else:
+        raise SyntaxError("Unknown directive")
+
+
+
+
+def parse_label_definition(lexer: lex.lexer):
+    expect(lexer.curr_tok.type == "IDENTIFIER", SyntaxError, "Expected a label name following the correct grammar.")
+    statement = {}
+    statement["type"] = "label"
     statement["label"] = lexer.curr_tok.val
     lexer.advance()
     expect(
@@ -210,10 +271,11 @@ def parse_line(line: str):
     lexer = lex.lexer(line)
     assert lexer.curr_tok.type == "BEGIN"
     lexer.advance()  # consume beginning of line token
-    if lexer.curr_tok.type == "SEMICOLON":
+    if lexer.lookahead_tok.type == "COLON":
+        return parse_label_definition(lexer)
+    elif lexer.curr_tok.type == "SEMICOLON":
         return None
-    elif lexer.curr_tok.type == "STRING":
-        # Likely an identifier
+    elif lexer.curr_tok.type == "IDENTIFIER":
         return parse_instr_statement(lexer)
     elif lexer.curr_tok.type == "PERIOD":
         return parse_directive_statement(lexer)

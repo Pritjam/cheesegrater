@@ -7,20 +7,20 @@
   MOVL %bx, #10
   MOVL %cx, #5
 ; add the 10 and 5 to the 69
-  CALL .ADD_AX_BX_CX
+  CALL ADD_AX_BX_CX
 ; print result
   STOREW %ax, [%ix]
   HALT
 
-.ADD_AX_BX_CX:
+ADD_AX_BX_CX:
   ADD %ax, %bx
 ; push %lr before making another call
   STOREW %lr, [%sp, #-2]!
-  CALL .ADD_AX_CX
+  CALL ADD_AX_CX
 ; pop %lr
   LOADW %lr, [%sp], #2
   RET
 
-.ADD_AX_CX:
+ADD_AX_CX:
   ADD %ax, %cx
   RET

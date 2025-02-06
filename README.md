@@ -4,7 +4,7 @@
 
 This is an assembler for the [pARMesan](https://github.com/Pritjam/parmesan) architecture. It takes input of SWISS assembly files (carrying the `.sws` extension) and creates WHEEL executable files from them. This repository also contains (or will eventually contain) the documentation for the WHEEL executable file format (a cheesy analog of the well-established ELF file format). 
 
-Currently, the assembler also takes in `.wedge` files, which serve as chunks of data to be loaded into memory. This is a temporary measure, as eventually the .sws file format will support embedding data into it and/or a compiler will be written. A `.wedge` file is very simple. The first 2 bytes are the starting offset to load the data into, and the remaining bytes are the data.
+This assembler is currently meant to generate complete 64KB system images. As such, the WHEEL that is generated has 1 segment of size 64KB. While the WHEEL format is specifically designed to make such monolithic images unnecessary, I have decided to do it anyway for the time being as it is easier to implement and allows me to focus on writing testcases.
 
 ## Usage
 

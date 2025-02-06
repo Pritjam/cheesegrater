@@ -114,9 +114,20 @@ class lexer:
             while self.current_char.isidentifier():
                 string += self.current_char
                 self.__advance_char()
-            # TODO: Caveat for jump instrs? maybe not?
+            ret.type = "IDENTIFIER"
+            ret.val = string
+            return ret
+        elif self.current_char == '"':
+            string = ""
+            self.__advance_char()
+            while not self.current_char == '"':
+                if self.eol:
+                    raise EOFError("Error: Encountered EOL while trying to parse string!")
+                string += self.current_char
+                self.__advance_char()
+            self.__advance_char()
             ret.type = "STRING"
-            ret.val = string.upper()
+            ret.val = string
             return ret
         else:
             raise SyntaxError(

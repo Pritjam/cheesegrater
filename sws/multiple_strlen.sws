@@ -1,3 +1,5 @@
+.seek $F000 
+
 ; open up stack space
   SUB %sp, #6
 ; load special address into %ix and store on stack
@@ -11,9 +13,9 @@
 ; load in ctr to 4
   MOVL %cx, #4
   MOVH %cx, #0
-.BODY:
+BODY:
   CMP %cx, #0
-  J.EQ .END
+  J.EQ END
   SUB %cx, #1
 ; save %cx as it is caller-saved
   STOREW %cx, [%sp]
@@ -21,31 +23,44 @@
   LOADW %ix, [%sp, #2]
   LOADW %ax, [%ix], #2
   STOREW %ix, [%sp, #2]
-  CALL .STRLEN
+  CALL STRLEN
 ; restore saved variable
   LOADW %cx, [%sp]
 ; %ax now has the length of the string, we must print it
   LOADW %ix, [%sp, #4]
   STOREW %ax, [%ix]
-  JMP .BODY
-.END:
+  JMP BODY
+END:
   HALT
 
 
-.STRLEN:
+STRLEN:
 ; pointer is stored in %ax. We need to return length in %ax as well.
   STOREW %ix, [%sp, #-2]!
   XOR %cx, %cx
   MOV %ix, %ax
   LOADB %ax, [%ix], #1
-  JMP .TEST
-.LOOP:
+  JMP TEST
+LOOP:
   ADD %cx, #1
   LOADB %ax, [%ix], #1
-.TEST:
+TEST:
   CMP %ax, #0
-  J.NE .LOOP
+  J.NE LOOP
 
   MOV %ax, %cx
   LOADW %ix, [%sp], #2
   RET
+
+
+.seek $1000
+.word $2000, $2010, $2020, $2030
+
+.seek $2000
+.asciiz "Hello World!"
+.align #16
+.asciiz "Prithvi J"
+.align #16
+.asciiz "pARMesan"
+.align #16
+.asciiz "Here's a string"
